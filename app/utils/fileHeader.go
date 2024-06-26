@@ -11,9 +11,11 @@ func ParseFileHeaderBytes(headerBytes []byte) (FileHeader, error) {
 
 	header.MagicString = string(headerBytes[0:16])
 
-	if err := binary.Read(bytes.NewReader(headerBytes[16:18]), binary.BigEndian, &header.PageSize); err != nil {
+	var pageSize uint16
+	if err := binary.Read(bytes.NewReader(headerBytes[16:18]), binary.BigEndian, &pageSize); err != nil {
 		return FileHeader{}, err
 	}
+	header.PageSize = int(pageSize)
 
 	if err := binary.Read(bytes.NewReader(headerBytes[18:19]), binary.BigEndian, &header.FileFormatWrite); err != nil {
 		return FileHeader{}, err
@@ -36,7 +38,7 @@ func ParseFileHeaderBytes(headerBytes []byte) (FileHeader, error) {
 
 type FileHeader struct {
 	MagicString     string
-	PageSize        uint16
+	PageSize        int
 	NumberOfPages   uint32
 	FileFormatWrite byte
 	FileFormatRead  byte
