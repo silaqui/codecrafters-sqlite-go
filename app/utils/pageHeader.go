@@ -41,6 +41,6 @@ type PageHeader struct {
 }
 
 func (h PageHeader) String() string {
-	return fmt.Sprintf("PageType: %v\nFirstFreeBlockOnPage: %v\nNumberOfCellsOnPage: %v\nStartOffsetOfCellContentArea: %v\nFragmentedBytes: %v\n",
+	return fmt.Sprintf("PageType: %v | FirstFreeBlockOnPage: %v | NumberOfCellsOnPage: %v | StartOffsetOfCellContentArea: %v | FragmentedBytes: %v",
 		h.PageType, h.FirstFreeBlockOnPage, h.NumberOfCellsOnPage, h.StartOffsetOfCellContentArea, h.FragmentedBytes)
 }

@@ -16,45 +16,65 @@ func main() {
 	databaseFilePath := os.Args[1]
 	command := os.Args[2]
 
+	databaseFile, err := os.Open(databaseFilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	headerBytes := make([]byte, 100)
+	_, err = databaseFile.Read(headerBytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	header, err := ParseFileHeaderBytes(headerBytes)
+	if err != nil {
+		log.Fatal(fmt.Printf("Error parsing header: %v\n", err))
+	}
+
+	masterEntries := parsMasterTable(databaseFile, header.PageSize)
+
 	switch command {
 	case ".dbinfo":
-		databaseFile, err := os.Open(databaseFilePath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		headerBytes := make([]byte, 100)
-		_, err = databaseFile.Read(headerBytes)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		header, err := ParseFileHeaderBytes(headerBytes)
-		if err != nil {
-			log.Fatal(fmt.Printf("Error parsing header: %v\n", err))
-		}
-
 		fmt.Printf("database page size: %v\n", header.PageSize)
-
-		//fmt.Printf("----------- 1 ------------- \n")
-		//readAndPrintPage(databaseFile, 1, header.PageSize, 100)
-		//fmt.Printf("----------- 2 ------------- \n")
-		//readAndPrintPage(databaseFile, 2, header.PageSize, 0)
-		//fmt.Printf("----------- 3 ------------- \n")
-		//readAndPrintPage(databaseFile, 3, header.PageSize, 0)
-		//fmt.Printf("----------- 4 ------------- \n")
-		//readAndPrintPage(databaseFile, 4, header.PageSize, 0)
-		//fmt.Printf("----------- x ------------- \n")
-
-		var numberOfTables = getNumberOfTables(databaseFile, header.PageSize)
+		var numberOfTables = len(masterEntries)
 		fmt.Printf("number of tables: %v\n", numberOfTables)
-
+	case ".print":
+		fmt.Printf("----------- 1 ------------- \n")
+		readAndPrintPage(databaseFile, 1, header.PageSize, 100)
+		fmt.Printf("----------- 2 ------------- \n")
+		readAndPrintPage(databaseFile, 2, header.PageSize, 0)
+		fmt.Printf("----------- 3 ------------- \n")
+		readAndPrintPage(databaseFile, 3, header.PageSize, 0)
+		fmt.Printf("----------- 4 ------------- \n")
+		readAndPrintPage(databaseFile, 4, header.PageSize, 0)
+		fmt.Printf("----------- x ------------- \n")
+	case ".tables":
+		for _, e := range masterEntries {
+			if e.Type_ == "table" {
+				fmt.Printf("%v ", e.TableName)
+			}
+		}
 	default:
 		fmt.Println("Unknown command", command)
 		os.Exit(1)
 	}
 }
 
+func parsMasterTable(databaseFile *os.File, pageSize uint16) []MasterEntry {
+	var out []MasterEntry
+
+	page, _ := readPage(databaseFile, 1, pageSize)
+	pageHeader, _ := ParsePageHeaderBytes(page[100:108])
+	cellPointers := getCellPointersArray(pageHeader.NumberOfCellsOnPage, page, 108)
+
+	for _, pointer := range cellPointers {
+		cell := ParseCell(pointer, page)
+		out = append(out, MasterEntryFromCell(cell))
+	}
+
+	return out
+}
 func getNumberOfTables(databaseFile *os.File, pageSize uint16) int {
 	page, _ := readPage(databaseFile, 1, pageSize)
 	pageHeader, _ := ParsePageHeaderBytes(page[100:108])
@@ -68,6 +88,7 @@ func getNumberOfTables(databaseFile *os.File, pageSize uint16) int {
 func readAndPrintPage(databaseFile *os.File, pageNumber uint32, pageSize, pageHeaderOffset uint16) {
 	page, _ := readPage(databaseFile, pageNumber, pageSize)
 	pageHeader, _ := ParsePageHeaderBytes(page[pageHeaderOffset : pageHeaderOffset+8])
+	//fmt.Println(pageHeader)
 	cellPointers := getCellPointersArray(pageHeader.NumberOfCellsOnPage, page, int(pageHeaderOffset+8))
 
 	for i := 0; i < len(cellPointers); i++ {

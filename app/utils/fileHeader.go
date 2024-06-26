@@ -44,6 +44,6 @@ type FileHeader struct {
 }
 
 func (h FileHeader) String() string {
-	return fmt.Sprintf("%v\nPage size: %v\nNumber of pages: %v\nWrite: %v\nRead: %v\nEncoding: %v\n",
+	return fmt.Sprintf("%v\nPage size: %v\nNumber of pages: %v\nWrite: %v\nRead: %v\nEncoding: %v",
 		h.MagicString, h.PageSize, h.NumberOfPages, h.FileFormatWrite, h.FileFormatRead, h.Encoding)
 }
