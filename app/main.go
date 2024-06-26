@@ -75,15 +75,6 @@ func parsMasterTable(databaseFile *os.File, pageSize uint16) []MasterEntry {
 
 	return out
 }
-func getNumberOfTables(databaseFile *os.File, pageSize uint16) int {
-	page, _ := readPage(databaseFile, 1, pageSize)
-	pageHeader, _ := ParsePageHeaderBytes(page[100:108])
-	cellPointers := getCellPointersArray(pageHeader.NumberOfCellsOnPage, page, 108)
-
-	var counter = len(cellPointers)
-
-	return counter
-}
 
 func readAndPrintPage(databaseFile *os.File, pageNumber uint32, pageSize, pageHeaderOffset uint16) {
 	page, _ := readPage(databaseFile, pageNumber, pageSize)
