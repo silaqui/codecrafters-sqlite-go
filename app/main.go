@@ -7,6 +7,7 @@ import (
 	. "github/com/codecrafters-io/sqlite-starter-go/app/utils"
 	"log"
 	"os"
+	"strings"
 	// Available if you need it!
 	// "github.com/xwb1989/sqlparser"
 )
@@ -50,11 +51,14 @@ func main() {
 		readAndPrintPage(databaseFile, 4, header.PageSize, 0)
 		fmt.Printf("----------- x ------------- \n")
 	case ".tables":
+		var names []string
 		for _, e := range masterEntries {
 			if e.Type_ == "table" {
-				fmt.Printf("%v ", e.TableName)
+				names = append(names, e.TableName)
 			}
 		}
+		result := strings.Join(names, " ")
+		fmt.Println(result)
 	default:
 		fmt.Println("Unknown command", command)
 		os.Exit(1)
