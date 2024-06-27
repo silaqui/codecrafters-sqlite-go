@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 	"os"
+	"strconv"
 )
 
 type Database struct {
@@ -153,6 +154,37 @@ func (d Database) GetFieldFromTable(tableName, fieldName string) []string {
 		out = append(out, string(e.Values[columnPosition]))
 	}
 
+	return out
+}
+
+func (d Database) ExecuteSQL(command SqlCommand) []string {
+	var out []string
+	if command.IsCount {
+		tableName := command.TableName
+		count := len(d.GetTableEntries(tableName))
+		out = append(out, strconv.Itoa(count))
+	} else {
+		tableName := command.TableName
+		masterEntry := d.getMasterEntryFor(tableName)
+		entries := d.GetTableEntries(tableName)
+
+		var positions []int
+		for _, name := range command.ColumnsNames {
+			columnPosition := masterEntry.GetColumnPosition(name)
+			positions = append(positions, columnPosition)
+		}
+
+		for _, e := range entries {
+			var buffer bytes.Buffer
+			for _, p := range positions {
+				if buffer.Len() != 0 {
+					buffer.WriteString("|")
+				}
+				buffer.Write(e.Values[p])
+			}
+			out = append(out, buffer.String())
+		}
+	}
 	return out
 }
 

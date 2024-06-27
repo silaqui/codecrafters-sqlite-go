@@ -5,7 +5,6 @@ import (
 	. "github/com/codecrafters-io/sqlite-starter-go/app/utils"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -28,27 +27,14 @@ func main() {
 }
 
 func parseSQL(d *Database, command string) {
-	tokens := strings.Split(command, " ")
-
-	if tokens[0] == "SELECT" {
-		if tokens[1] == "COUNT(*)" {
-			var tableName = tokens[len(tokens)-1]
-			count := len(d.GetTableEntries(tableName))
-			fmt.Printf(strconv.Itoa(count))
-		} else {
-			var tableName = tokens[len(tokens)-1]
-			for i, e := range d.GetFieldFromTable(tableName, tokens[1]) {
-				fmt.Println(e)
-				if i > 19 {
-					break
-				}
-			}
-		}
-		//else {
-		//	log.Printf("Unknown command: %v", command)
-		//}
-	} else {
-		log.Printf("Unknown command: %v", command)
+	c, err := ParseSql(command)
+	if err != nil {
+		log.Printf("Unknown command: %v|", command, err)
+		return
+	}
+	result := d.ExecuteSQL(c)
+	for _, e := range result {
+		fmt.Println(e)
 	}
 }
 
