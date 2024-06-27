@@ -1,6 +1,9 @@
 package utils
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"strings"
+)
 
 type MasterEntry struct {
 	Type_      string
@@ -20,5 +23,20 @@ func MasterEntryFromCell(c TableLeafCell) MasterEntry {
 	out.RootPage = int(root)
 	out.Sql = string(c.Values[4])
 
+	return out
+}
+
+func (m MasterEntry) GetColumnPosition(columnName string) int {
+	out := -1
+	open := strings.IndexRune(m.Sql, '(') + 1
+	part := m.Sql[open:]
+	split := strings.Split(part, ",")
+	for i, s := range split {
+		name := strings.Split(strings.Trim(s, " "), " ")[0]
+		if name == columnName {
+			out = i
+			break
+		}
+	}
 	return out
 }

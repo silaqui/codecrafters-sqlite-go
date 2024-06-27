@@ -173,7 +173,7 @@ func (c TableLeafCell) PrettyValues() string {
 			buffer.Write(v)
 			buffer.WriteString("|")
 		} else {
-			var str = fmt.Sprintf("Unknown print type: %v at position: %v|", s, i)
+			var str = fmt.Sprintf("UNKNOWN PRINT i:%v-s:%v-v:%v|", i, s, v)
 			buffer.WriteString(str)
 		}
 	}

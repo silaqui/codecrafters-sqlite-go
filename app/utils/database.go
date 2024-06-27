@@ -138,8 +138,22 @@ func getPageInteriorCells(page []byte, pageHeaderOffset int) []TableInteriorCell
 }
 
 func (d Database) GetTableEntries(tableName string) []TableLeafCell {
-	rootPage := d.getRootTableFor(tableName)
+	rootPage := d.getMasterEntryFor(tableName).RootPage
 	return d.getLeafs(rootPage)
+}
+
+func (d Database) GetFieldFromTable(tableName, fieldName string) []string {
+	masterEntry := d.getMasterEntryFor(tableName)
+	rootPage := masterEntry.RootPage
+	entries := d.getLeafs(rootPage)
+	columnPosition := masterEntry.GetColumnPosition(fieldName)
+
+	var out []string
+	for _, e := range entries {
+		out = append(out, string(e.Values[columnPosition]))
+	}
+
+	return out
 }
 
 func (d Database) getLeafs(pageNumber int) []TableLeafCell {
@@ -167,16 +181,12 @@ func (d Database) getLeafs(pageNumber int) []TableLeafCell {
 	return out
 }
 
-func (d Database) getRootTableFor(tableName string) int {
-	rootPage := -1
+func (d Database) getMasterEntryFor(tableName string) MasterEntry {
 	for _, e := range d.MasterTable {
 		if e.TableName == tableName {
-			rootPage = e.RootPage
-			break
+			return e
 		}
 	}
-	if rootPage == -1 {
-		log.Fatalf("No table: %v", tableName)
-	}
-	return rootPage
+	log.Fatalf("No table: %v", tableName)
+	return MasterEntry{}
 }

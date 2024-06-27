@@ -36,8 +36,17 @@ func parseSQL(d *Database, command string) {
 			count := len(d.GetTableEntries(tableName))
 			fmt.Printf(strconv.Itoa(count))
 		} else {
-			log.Printf("Unknown command: %v", command)
+			var tableName = tokens[len(tokens)-1]
+			for i, e := range d.GetFieldFromTable(tableName, tokens[1]) {
+				fmt.Println(e)
+				if i > 19 {
+					break
+				}
+			}
 		}
+		//else {
+		//	log.Printf("Unknown command: %v", command)
+		//}
 	} else {
 		log.Printf("Unknown command: %v", command)
 	}
@@ -55,7 +64,7 @@ func tables(d *Database) {
 }
 
 func printContent(d *Database, number int) {
-	number = 3
+	number = 1
 	for i := 1; i <= number; i++ {
 		log.Printf("----------- %v ------------- \n", i)
 		d.ReadAndPrintPage(i)
