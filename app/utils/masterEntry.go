@@ -32,7 +32,7 @@ func (m MasterEntry) GetColumnPosition(columnName string) int {
 	part := m.Sql[open:]
 	split := strings.Split(part, ",")
 	for i, s := range split {
-		name := strings.Split(strings.Trim(s, " "), " ")[0]
+		name := strings.Split(strings.TrimSpace(s), " ")[0]
 		if name == columnName {
 			out = i
 			break

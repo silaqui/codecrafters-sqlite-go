@@ -168,15 +168,35 @@ func (d Database) ExecuteSQL(command SqlCommand) []string {
 		masterEntry := d.getMasterEntryFor(tableName)
 		entries := d.GetTableEntries(tableName)
 
-		var positions []int
+		var selectFieldsPositions []int
 		for _, name := range command.ColumnsNames {
 			columnPosition := masterEntry.GetColumnPosition(name)
-			positions = append(positions, columnPosition)
+			selectFieldsPositions = append(selectFieldsPositions, columnPosition)
+		}
+		for i := 0; i < len(command.Conditions); i++ {
+			command.Conditions[i].FieldPosition = masterEntry.GetColumnPosition(command.Conditions[i].Field)
 		}
 
 		for _, e := range entries {
 			var buffer bytes.Buffer
-			for _, p := range positions {
+
+			skipValue := false
+			for _, c := range command.Conditions {
+				if c.Operator != "=" {
+					log.Printf("Not implemented WHERE condtion %v", c.Operator)
+					continue
+				}
+				fieldValue := e.Values[c.FieldPosition]
+				if string(fieldValue) != c.RestrictingValue {
+					skipValue = true
+				}
+
+			}
+			if skipValue {
+				continue
+			}
+
+			for _, p := range selectFieldsPositions {
 				if buffer.Len() != 0 {
 					buffer.WriteString("|")
 				}
