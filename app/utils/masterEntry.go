@@ -10,7 +10,7 @@ type MasterEntry struct {
 	Sql        string
 }
 
-func MasterEntryFromCell(c Cell) MasterEntry {
+func MasterEntryFromCell(c TableLeafCell) MasterEntry {
 	var out = MasterEntry{}
 
 	out.Type_ = string(c.Values[0])

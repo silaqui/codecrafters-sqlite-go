@@ -16,39 +16,55 @@ func main() {
 
 	switch command {
 	case ".dbinfo":
-		fmt.Printf("database page size: %v\n", d.Header.PageSize)
-		var numberOfTables = len(d.MasterTable)
-		fmt.Printf("number of tables: %v\n", numberOfTables)
+		dbInfo(d)
 	case ".print":
-		fmt.Printf("----------- 1 ------------- \n")
-		d.ReadAndPrintPage(1)
-		fmt.Printf("----------- 2 ------------- \n")
-		d.ReadAndPrintPage(2)
-		fmt.Printf("----------- 3 ------------- \n")
-		d.ReadAndPrintPage(3)
-		fmt.Printf("----------- 4 ------------- \n")
-		d.ReadAndPrintPage(4)
-		fmt.Printf("----------- x ------------- \n")
+		printContent(d, int(d.Header.NumberOfPages))
 	case ".tables":
-		var names []string
-		for _, e := range d.MasterTable {
-			if e.Type_ == "table" {
-				names = append(names, e.TableName)
-			}
-		}
-		result := strings.Join(names, " ")
-		fmt.Println(result)
+		tables(d)
 	default:
-		tokens := strings.Split(command, " ")
-		var tableName = tokens[len(tokens)-1]
-		for _, e := range d.MasterTable {
-			if e.TableName == tableName {
-				page := d.ReadPage(e.RootPage)
-				pageHeader, _ := ParsePageHeaderBytes(page[0:8])
-				cellPointers := GetCellPointersArray(pageHeader.NumberOfCellsOnPage, page, 108)
-				count := len(cellPointers)
-				fmt.Printf(strconv.Itoa(count))
-			}
+		parseSQL(d, command)
+	}
+}
+
+func parseSQL(d *Database, command string) {
+	tokens := strings.Split(command, " ")
+
+	if tokens[0] == "SELECT" {
+		if tokens[1] == "COUNT(*)" {
+			var tableName = tokens[len(tokens)-1]
+			count := len(d.GetTableEntries(tableName))
+			fmt.Printf(strconv.Itoa(count))
+		} else {
+			//var tableName = tokens[len(tokens)-1]
+			//d.GetTableInfo(tableName)
+			//entries := d.GetTableEntries(tableName)
+		}
+	} else {
+		fmt.Printf("Unknown command: %v", command)
+	}
+}
+
+func tables(d *Database) {
+	var names []string
+	for _, e := range d.MasterTable {
+		if e.Type_ == "table" {
+			names = append(names, e.TableName)
 		}
 	}
+	result := strings.Join(names, " ")
+	fmt.Println(result)
+}
+
+func printContent(d *Database, number int) {
+	for i := 1; i <= number; i++ {
+		fmt.Printf("----------- %v ------------- \n", i)
+		d.ReadAndPrintPage(i)
+	}
+	fmt.Printf("----------- x ------------- \n")
+}
+
+func dbInfo(d *Database) {
+	fmt.Printf("database page size: %v\n", d.Header.PageSize)
+	var numberOfTables = len(d.MasterTable)
+	fmt.Printf("number of tables: %v\n", numberOfTables)
 }

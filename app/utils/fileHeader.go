@@ -6,6 +6,15 @@ import (
 	"fmt"
 )
 
+type FileHeader struct {
+	MagicString     string
+	PageSize        int
+	NumberOfPages   uint32
+	FileFormatWrite byte
+	FileFormatRead  byte
+	Encoding        uint32
+}
+
 func ParseFileHeaderBytes(headerBytes []byte) (FileHeader, error) {
 	var header FileHeader
 
@@ -36,16 +45,7 @@ func ParseFileHeaderBytes(headerBytes []byte) (FileHeader, error) {
 	return header, nil
 }
 
-type FileHeader struct {
-	MagicString     string
-	PageSize        int
-	NumberOfPages   uint32
-	FileFormatWrite byte
-	FileFormatRead  byte
-	Encoding        uint32
-}
-
 func (h FileHeader) String() string {
-	return fmt.Sprintf("%v\nPage size: %v\nNumber of pages: %v\nWrite: %v\nRead: %v\nEncoding: %v",
+	return fmt.Sprintf("%v|Page size: %v|Number of pages: %v|Write: %v|Read: %v|Encoding: %v",
 		h.MagicString, h.PageSize, h.NumberOfPages, h.FileFormatWrite, h.FileFormatRead, h.Encoding)
 }
