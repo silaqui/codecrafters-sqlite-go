@@ -21,7 +21,7 @@ func (c TableLeafCell) String() string {
 		"Payload: %v | ID: %v | HS:%v | S:%v | V:%v", c.Payload, c.RowId, c.RecordHeaderSize, c.SerialTypes, c.Values)
 }
 
-func parseCell(cellStart uint16, page []byte) TableLeafCell {
+func parseLeafCell(cellStart uint16, page []byte) TableLeafCell {
 	var cell TableLeafCell
 
 	var index = 0

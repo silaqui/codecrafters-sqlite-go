@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	. "github/com/codecrafters-io/sqlite-starter-go/app/utils"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -35,12 +36,10 @@ func parseSQL(d *Database, command string) {
 			count := len(d.GetTableEntries(tableName))
 			fmt.Printf(strconv.Itoa(count))
 		} else {
-			//var tableName = tokens[len(tokens)-1]
-			//d.GetTableInfo(tableName)
-			//entries := d.GetTableEntries(tableName)
+			log.Printf("Unknown command: %v", command)
 		}
 	} else {
-		fmt.Printf("Unknown command: %v", command)
+		log.Printf("Unknown command: %v", command)
 	}
 }
 
@@ -56,11 +55,12 @@ func tables(d *Database) {
 }
 
 func printContent(d *Database, number int) {
+	number = 3
 	for i := 1; i <= number; i++ {
-		fmt.Printf("----------- %v ------------- \n", i)
+		log.Printf("----------- %v ------------- \n", i)
 		d.ReadAndPrintPage(i)
 	}
-	fmt.Printf("----------- x ------------- \n")
+	log.Printf("----------- x ------------- \n")
 }
 
 func dbInfo(d *Database) {
